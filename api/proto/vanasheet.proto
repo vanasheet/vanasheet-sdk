@@ -1,0 +1,41 @@
+syntax="proto3";
+
+import "google/protobuf/struct.proto";
+
+package vanasheetpb;
+
+// go_package
+option go_package="github.com/vanasheet/vanasheet-sdk/go/pkg/vanasheetpb";
+
+message AppendRowRequest {
+    string spreadsheet_id = 1;
+    string sheetname = 2;
+    google.protobuf.Struct row = 3;
+}
+
+message AppendRowResponse {
+    google.protobuf.Struct row = 1;
+}
+
+message RawReadQueryRequest {
+    string spreadsheet_id = 1;
+    string a1range = 2;
+    string query = 3;
+}
+
+message RawReadQueryResponse {
+    
+    // by repeating this message, to get 2D array 
+    message RawRow {
+        repeated google.protobuf.Value vals = 1;
+    }
+
+    repeated RawRow rows = 1;   
+}
+
+service Vanasheet {
+    // raw 
+    rpc RawReadQuery(RawReadQueryRequest) returns (RawReadQueryResponse) {};
+    // smart
+    rpc AppendRow(AppendRowRequest) returns (AppendRowResponse) {};
+}
