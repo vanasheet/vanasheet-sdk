@@ -98,6 +98,7 @@ func (client *VanasheetIO) RawAppendRows(
 	reqPb.Rows = make([]*vanasheetpb.RawRow, len(rows))
 	var err error
 	for i, row := range rows {
+		reqPb.Rows[i] = &vanasheetpb.RawRow{}
 		reqPb.Rows[i].Vals = make([]*structpb.Value, len(row))
 		for j, val := range row {
 			reqPb.Rows[i].Vals[j], err = structpb.NewValue(val)
