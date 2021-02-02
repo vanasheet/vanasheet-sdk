@@ -74,7 +74,45 @@ func (client *VanasheetIO) RawReadQuery(
 	}
 
 	resp := make([][]interface{}, len(respPb.Rows))
+	for i, row := range respPb.Rows {
+		resp[i] = make([]interface{}, len(row.Vals))
+		for j, v := range row.Vals {
+			resp[i][j] = v.AsInterface()
+		}
+	}
 
+	return resp, nil
+}
+
+func (client *VanasheetIO) RawAppendRows(
+	ctx context.Context,
+	spreadsheetID string,
+	sheetname string,
+	rows [][]interface{},
+) ([][]interface{}, error) {
+	outgoingCtx := metadata.AppendToOutgoingContext(ctx, "authorization", client.apiKey)
+
+	reqPb := &vanasheetpb.RawAppendRowsRequest{}
+	reqPb.SpreadsheetId = spreadsheetID
+	reqPb.Sheetname = sheetname
+	reqPb.Rows = make([]*vanasheetpb.RawRow, len(rows))
+	var err error
+	for i, row := range rows {
+		reqPb.Rows[i].Vals = make([]*structpb.Value, len(row))
+		for j, val := range row {
+			reqPb.Rows[i].Vals[j], err = structpb.NewValue(val)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	respPb, err := client.client.RawAppendRows(outgoingCtx, reqPb)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := make([][]interface{}, len(respPb.Rows))
 	for i, row := range respPb.Rows {
 		resp[i] = make([]interface{}, len(row.Vals))
 		for j, v := range row.Vals {

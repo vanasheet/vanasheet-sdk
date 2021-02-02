@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 type VanasheetClient interface {
 	// raw
 	RawReadQuery(ctx context.Context, in *RawReadQueryRequest, opts ...grpc.CallOption) (*RawReadQueryResponse, error)
+	RawAppendRows(ctx context.Context, in *RawAppendRowsRequest, opts ...grpc.CallOption) (*RawAppendRowsResponse, error)
 	// smart
 	AppendRow(ctx context.Context, in *AppendRowRequest, opts ...grpc.CallOption) (*AppendRowResponse, error)
 }
@@ -40,6 +41,15 @@ func (c *vanasheetClient) RawReadQuery(ctx context.Context, in *RawReadQueryRequ
 	return out, nil
 }
 
+func (c *vanasheetClient) RawAppendRows(ctx context.Context, in *RawAppendRowsRequest, opts ...grpc.CallOption) (*RawAppendRowsResponse, error) {
+	out := new(RawAppendRowsResponse)
+	err := c.cc.Invoke(ctx, "/vanasheetpb.Vanasheet/RawAppendRows", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *vanasheetClient) AppendRow(ctx context.Context, in *AppendRowRequest, opts ...grpc.CallOption) (*AppendRowResponse, error) {
 	out := new(AppendRowResponse)
 	err := c.cc.Invoke(ctx, "/vanasheetpb.Vanasheet/AppendRow", in, out, opts...)
@@ -55,6 +65,7 @@ func (c *vanasheetClient) AppendRow(ctx context.Context, in *AppendRowRequest, o
 type VanasheetServer interface {
 	// raw
 	RawReadQuery(context.Context, *RawReadQueryRequest) (*RawReadQueryResponse, error)
+	RawAppendRows(context.Context, *RawAppendRowsRequest) (*RawAppendRowsResponse, error)
 	// smart
 	AppendRow(context.Context, *AppendRowRequest) (*AppendRowResponse, error)
 	mustEmbedUnimplementedVanasheetServer()
@@ -66,6 +77,9 @@ type UnimplementedVanasheetServer struct {
 
 func (UnimplementedVanasheetServer) RawReadQuery(context.Context, *RawReadQueryRequest) (*RawReadQueryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RawReadQuery not implemented")
+}
+func (UnimplementedVanasheetServer) RawAppendRows(context.Context, *RawAppendRowsRequest) (*RawAppendRowsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RawAppendRows not implemented")
 }
 func (UnimplementedVanasheetServer) AppendRow(context.Context, *AppendRowRequest) (*AppendRowResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AppendRow not implemented")
@@ -101,6 +115,24 @@ func _Vanasheet_RawReadQuery_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Vanasheet_RawAppendRows_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RawAppendRowsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(VanasheetServer).RawAppendRows(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/vanasheetpb.Vanasheet/RawAppendRows",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(VanasheetServer).RawAppendRows(ctx, req.(*RawAppendRowsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Vanasheet_AppendRow_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AppendRowRequest)
 	if err := dec(in); err != nil {
@@ -126,6 +158,10 @@ var _Vanasheet_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RawReadQuery",
 			Handler:    _Vanasheet_RawReadQuery_Handler,
+		},
+		{
+			MethodName: "RawAppendRows",
+			Handler:    _Vanasheet_RawAppendRows_Handler,
 		},
 		{
 			MethodName: "AppendRow",

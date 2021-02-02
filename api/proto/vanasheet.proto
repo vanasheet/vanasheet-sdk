@@ -7,6 +7,13 @@ package vanasheetpb;
 // go_package
 option go_package="github.com/vanasheet/vanasheet-sdk/go/pkg/vanasheetpb";
 
+/* Intermediate Message Types */
+// by repeateing this message, to get 2D array 
+message RawRow {
+    repeated google.protobuf.Value vals = 1;
+}
+
+/* Smart Types - Vanasheet will try to understand this according to definition */
 message AppendRowRequest {
     string spreadsheet_id = 1;
     string sheetname = 2;
@@ -17,6 +24,7 @@ message AppendRowResponse {
     google.protobuf.Struct row = 1;
 }
 
+/* Raw Message - Client is responsible for the correctness of using this */
 message RawReadQueryRequest {
     string spreadsheet_id = 1;
     string a1range = 2;
@@ -24,18 +32,24 @@ message RawReadQueryRequest {
 }
 
 message RawReadQueryResponse {
-    
-    // by repeating this message, to get 2D array 
-    message RawRow {
-        repeated google.protobuf.Value vals = 1;
-    }
-
     repeated RawRow rows = 1;   
+}
+
+message RawAppendRowsRequest {
+    string spreadsheet_id = 1;
+    string sheetname = 2;
+    repeated RawRow rows = 3;
+}
+
+message RawAppendRowsResponse {
+    repeated RawRow rows = 1;
 }
 
 service Vanasheet {
     // raw 
     rpc RawReadQuery(RawReadQueryRequest) returns (RawReadQueryResponse) {};
+    rpc RawAppendRows(RawAppendRowsRequest) returns (RawAppendRowsResponse) {};
+
     // smart
     rpc AppendRow(AppendRowRequest) returns (AppendRowResponse) {};
 }
